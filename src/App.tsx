@@ -3,9 +3,9 @@ import SideMenu from "./components/SideMenu";
 
 function App() {
   return (
-    <div>
+    <div className="app-container">
       <SideMenu />
-      <main>Page content here</main>
+      <main className="main-content">Page content here</main>
     </div>
   );
 }
