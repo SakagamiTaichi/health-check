@@ -1,32 +1,15 @@
-import React, { useState } from "react";
 import {
   Drawer,
   List,
   ListItemIcon,
   ListItemText,
-  IconButton,
   ListItemButton,
 } from "@mui/material";
 import { Home, Info, ContactMail, Settings, Help } from "@mui/icons-material";
-import MenuIcon from "@mui/icons-material/Menu";
 
 const SideMenu: React.FC = () => {
-  const [open, setOpen] = useState(false);
-
-  const toggleDrawer =
-    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-      if (
-        event.type === "keydown" &&
-        ((event as React.KeyboardEvent).key === "Tab" ||
-          (event as React.KeyboardEvent).key === "Shift")
-      ) {
-        return;
-      }
-      setOpen(open);
-    };
-
   const menuItems = [
-    { text: "Home", icon: <Home /> },
+    { text: "Monitor", icon: <Home /> },
     { text: "About", icon: <Info /> },
     { text: "Contact", icon: <ContactMail /> },
     { text: "Settings", icon: <Settings /> },
@@ -34,23 +17,22 @@ const SideMenu: React.FC = () => {
   ];
 
   return (
-    <div>
-      <IconButton onClick={toggleDrawer(true)}>
-        <MenuIcon />
-      </IconButton>
-      <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}>
-        <List>
-          {menuItems.map((item) => {
-            return (
-              <ListItemButton>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            );
-          })}
-        </List>
-      </Drawer>
-    </div>
+    <Drawer
+      anchor="left"
+      variant="permanent"
+      sx={{ width: 270, flexShrink: 0, "& .MuiDrawer-paper": { width: 270 } }}
+    >
+      <List>
+        {menuItems.map((item) => {
+          return (
+            <ListItemButton>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          );
+        })}
+      </List>
+    </Drawer>
   );
 };
 
