@@ -5,12 +5,20 @@ import {
   ListItemText,
   ListItemButton,
 } from '@mui/material';
-import { Home, Info, ContactMail, Settings, Help } from '@mui/icons-material';
+import {
+  Home,
+  Info,
+  ContactMail,
+  Settings,
+  Help,
+  HealthAndSafety,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const SideMenu: React.FC = () => {
   const navigate = useNavigate();
   const menuItems = [
+    { text: 'Health Check', icon: <HealthAndSafety />, path: '/health-check' },
     { text: 'Todo', icon: <Home />, path: '/todo' },
     { text: 'Counter', icon: <Info />, path: '/counter' },
     { text: 'Contact', icon: <ContactMail />, path: '/contact' },
