@@ -1,11 +1,4 @@
-import React, { useEffect } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
   Button,
   Typography,
@@ -13,7 +6,9 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
+  Box,
 } from '@mui/material';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { CheckCircle, Error, Refresh, RotateLeft } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../../hooks/hooks';
 import {
@@ -23,20 +18,6 @@ import {
   performDnsResolutionCheck,
   resetHealthChecks,
 } from '../../health-check/slices/healthCheckSlice';
-
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return 'Never';
-
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).format(date);
-};
 
 const getStatusChip = (status: HealthCheckItem['status']) => {
   switch (status) {
@@ -93,10 +74,83 @@ const HealthCheckTable: React.FC = () => {
     dispatch(resetHealthChecks());
   };
 
+  const columns: GridColDef[] = [
+    {
+      field: 'name',
+      headerName: 'サービス',
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant='body2' fontSize={12}>
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'endpoint',
+      headerName: 'エンドポイント',
+      flex: 1.5,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant='body2' style={{ fontFamily: 'monospace' }}>
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'status',
+      headerName: 'ステータス',
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) => getStatusChip(params.value),
+    },
+    {
+      field: 'lastCheckedAt',
+      headerName: '最終チェック',
+      flex: 1,
+      // valueGetter: (params) => formatDate(params.value),
+    },
+    {
+      field: 'message',
+      headerName: 'メッセージ',
+      flex: 1.5,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row as HealthCheckItem;
+        return (
+          <Typography
+            variant='body2'
+            color={row.status === 'failure' ? 'error' : 'textSecondary'}
+            noWrap
+          >
+            {params.value || '—'}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: 'actions',
+      headerName: 'アクション',
+      flex: 0.7,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row as HealthCheckItem;
+        return (
+          <Tooltip title='Run check'>
+            <IconButton
+              color='primary'
+              onClick={() => handleCheck(row.id)}
+              disabled={row.status === 'pending'}
+            >
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+        );
+      },
+    },
+  ];
+
   return (
-    <div style={{ padding: '20px' }}>
-      <div
-        style={{
+    <Box sx={{ padding: '20px' }}>
+      <Box
+        sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -104,17 +158,17 @@ const HealthCheckTable: React.FC = () => {
         }}
       >
         <Typography variant='h4' component='h1'>
-          Health Check Monitoring
+          ヘルスチェックモニタリング
         </Typography>
-        <div>
+        <Box>
           <Button
             variant='contained'
             color='primary'
             startIcon={<Refresh />}
             onClick={handleCheckAll}
-            style={{ marginRight: '10px' }}
+            sx={{ marginRight: '10px' }}
           >
-            Check All
+            全チェック
           </Button>
           <Button
             variant='outlined'
@@ -122,90 +176,29 @@ const HealthCheckTable: React.FC = () => {
             startIcon={<RotateLeft />}
             onClick={handleReset}
           >
-            Reset
+            リセット
           </Button>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      <TableContainer component={Paper} elevation={3}>
-        <Table aria-label='health check table'>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                Service
-              </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                Endpoint
-              </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                Status
-              </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                Last Checked
-              </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                Message
-              </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow
-                key={item.id}
-                hover
-                sx={{
-                  '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
-                  backgroundColor:
-                    item.status === 'failure'
-                      ? 'rgba(255, 0, 0, 0.05)'
-                      : undefined,
-                }}
-              >
-                <TableCell component='th' scope='row'>
-                  <Typography variant='body1'>{item.name}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography
-                    variant='body2'
-                    style={{ fontFamily: 'monospace' }}
-                  >
-                    {item.endpoint}
-                  </Typography>
-                </TableCell>
-                <TableCell>{getStatusChip(item.status)}</TableCell>
-                <TableCell>{formatDate(item.lastCheckedAt)}</TableCell>
-                <TableCell>
-                  <Typography
-                    variant='body2'
-                    color={
-                      item.status === 'failure' ? 'error' : 'textSecondary'
-                    }
-                    noWrap
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {item.message || '—'}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Tooltip title='Run check'>
-                    <IconButton
-                      color='primary'
-                      onClick={() => handleCheck(item.id)}
-                      disabled={item.status === 'pending'}
-                    >
-                      <Refresh />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+      <Paper elevation={3} sx={{ width: '1100px' }}>
+        <DataGrid
+          rows={items}
+          columns={columns}
+          disableRowSelectionOnClick
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 25 },
+            },
+          }}
+          getRowClassName={(params) => {
+            const item = params.row as HealthCheckItem;
+            return item.status === 'failure' ? 'error-row' : '';
+          }}
+          sx={{}}
+        />
+      </Paper>
+    </Box>
   );
 };
 

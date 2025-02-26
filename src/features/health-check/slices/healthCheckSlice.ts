@@ -21,7 +21,7 @@ const initialState: HealthCheckState = {
   items: [
     {
       id: 'api-health',
-      name: 'API Health Check',
+      name: 'APIヘルスチェック',
       endpoint: 'https://ai-app-backend-zr75.onrender.com/api/v1/health_check/',
       status: 'idle',
       lastCheckedAt: null,
@@ -29,7 +29,7 @@ const initialState: HealthCheckState = {
     },
     {
       id: 'dns-resolution',
-      name: 'DNS Resolution',
+      name: '名前解決チェック',
       endpoint: 'ai-app-backend-zr75.onrender.com',
       status: 'idle',
       lastCheckedAt: null,
